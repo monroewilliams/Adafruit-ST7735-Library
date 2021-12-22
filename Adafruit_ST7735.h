@@ -13,6 +13,7 @@
 #define INITR_144GREENTAB 0x01
 #define INITR_MINI160x80 0x04
 #define INITR_HALLOWING 0x05
+#define INITR_BAD_CYBERB 0x06
 
 // Some register settings
 #define ST7735_MADCTL_BGR 0x08
@@ -65,6 +66,7 @@ public:
 
 private:
   uint8_t tabcolor;
+  bool use_rgb;
 };
 
 #endif // _ADAFRUIT_ST7735H_

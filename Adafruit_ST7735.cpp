@@ -234,22 +234,34 @@ void Adafruit_ST7735::initR(uint8_t options) {
     displayInit(Rcmd2green160x80);
     _colstart = 24;
     _rowstart = 0;
+  } else if (options == INITR_BAD_CYBERB) {
+    // Similar to INITR_MINI160x80, but different.
+    _height = ST7735_TFTWIDTH_80;
+    _width = ST7735_TFTHEIGHT_160;
+    displayInit(Rcmd2green160x80);
+    _colstart = 26;
+    _rowstart = 1;
   } else {
     // colstart, rowstart left at default '0' values
     displayInit(Rcmd2red);
   }
   displayInit(Rcmd3);
 
-  // Black tab, change MADCTL color filter
+  // Black tab, use rgb instead of bgr.
+  // setRotation() will use this to set the register correctly.
   if ((options == INITR_BLACKTAB) || (options == INITR_MINI160x80)) {
-    uint8_t data = 0xC0;
-    sendCommand(ST77XX_MADCTL, &data, 1);
+    use_rgb = true;
+  } else {
+    use_rgb = false;
   }
 
   if (options == INITR_HALLOWING) {
     // Hallowing is simply a 1.44" green tab upside-down:
     tabcolor = INITR_144GREENTAB;
     setRotation(2);
+  } else if (options == INITR_BAD_CYBERB) {
+    tabcolor = INITR_MINI160x80;
+    setRotation(3);
   } else {
     tabcolor = options;
     setRotation(0);
@@ -277,11 +289,7 @@ void Adafruit_ST7735::setRotation(uint8_t m) {
 
   switch (rotation) {
   case 0:
-    if ((tabcolor == INITR_BLACKTAB) || (tabcolor == INITR_MINI160x80)) {
-      madctl = ST77XX_MADCTL_MX | ST77XX_MADCTL_MY | ST77XX_MADCTL_RGB;
-    } else {
-      madctl = ST77XX_MADCTL_MX | ST77XX_MADCTL_MY | ST7735_MADCTL_BGR;
-    }
+    madctl = ST77XX_MADCTL_MX | ST77XX_MADCTL_MY | (use_rgb?ST77XX_MADCTL_RGB:ST7735_MADCTL_BGR);
 
     if (tabcolor == INITR_144GREENTAB) {
       _height = ST7735_TFTHEIGHT_128;
@@ -297,11 +305,7 @@ void Adafruit_ST7735::setRotation(uint8_t m) {
     _ystart = _rowstart;
     break;
   case 1:
-    if ((tabcolor == INITR_BLACKTAB) || (tabcolor == INITR_MINI160x80)) {
-      madctl = ST77XX_MADCTL_MY | ST77XX_MADCTL_MV | ST77XX_MADCTL_RGB;
-    } else {
-      madctl = ST77XX_MADCTL_MY | ST77XX_MADCTL_MV | ST7735_MADCTL_BGR;
-    }
+    madctl = ST77XX_MADCTL_MY | ST77XX_MADCTL_MV | (use_rgb?ST77XX_MADCTL_RGB:ST7735_MADCTL_BGR);
 
     if (tabcolor == INITR_144GREENTAB) {
       _width = ST7735_TFTHEIGHT_128;
@@ -317,11 +321,7 @@ void Adafruit_ST7735::setRotation(uint8_t m) {
     _xstart = _rowstart;
     break;
   case 2:
-    if ((tabcolor == INITR_BLACKTAB) || (tabcolor == INITR_MINI160x80)) {
-      madctl = ST77XX_MADCTL_RGB;
-    } else {
-      madctl = ST7735_MADCTL_BGR;
-    }
+      madctl = use_rgb?ST77XX_MADCTL_RGB:ST7735_MADCTL_BGR;
 
     if (tabcolor == INITR_144GREENTAB) {
       _height = ST7735_TFTHEIGHT_128;
@@ -337,11 +337,7 @@ void Adafruit_ST7735::setRotation(uint8_t m) {
     _ystart = _rowstart;
     break;
   case 3:
-    if ((tabcolor == INITR_BLACKTAB) || (tabcolor == INITR_MINI160x80)) {
-      madctl = ST77XX_MADCTL_MX | ST77XX_MADCTL_MV | ST77XX_MADCTL_RGB;
-    } else {
-      madctl = ST77XX_MADCTL_MX | ST77XX_MADCTL_MV | ST7735_MADCTL_BGR;
-    }
+    madctl = ST77XX_MADCTL_MX | ST77XX_MADCTL_MV | (use_rgb?ST77XX_MADCTL_RGB:ST7735_MADCTL_BGR);
 
     if (tabcolor == INITR_144GREENTAB) {
       _width = ST7735_TFTHEIGHT_128;
